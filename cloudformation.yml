@@ -1,0 +1,338 @@
+#adapted from : https://github.com/Integralist/CloudFormation/blob/master/EC2.yml
+
+AWSTemplateFormatVersion: '2010-09-09' 
+
+# Paramaters are referenced using the Ref property
+# e.g. Ref: "KeyName"
+#
+# Parameters can be assigned a default value, but if not then the value
+# needs to be provided when uploading the CloudFormation.
+# If uploading via CLI then you'll provide a --parameters flag
+# If uploading via the AWS console, a GUI will be provided
+Parameters:
+  KeyName:
+    Description: "Optional: Name of an existing EC2 KeyPair to enable SSH access to the instance"
+    Type: String
+    Default: ""
+  InstanceTypeParameter: 
+    Type: String 
+    Description: "Enter an EC2 instance type."
+    Default: t2.medium
+  IriApiPort:
+    Description: "IRI API PORT"
+    Type: Number
+    Default: "14265"
+  IriUdpPort:
+    Description: "IRI UDP PORT"
+    Type: Number
+    Default: "14600"
+  IriTcpPort:
+    Description: "IRI TCP PORT"
+    Type: Number
+    Default: "15600"
+  IriExternalApiIp:
+    Description: "IRI External API IP"
+    Type: String
+    Default: "0.0.0.0"
+  IriInternalApiIp:
+    Description: "IRI Internal API IP"
+    Type: String
+    Default: "127.0.0.1"
+  IotaPmApiIp:
+    Description: "IOTA-PM API IP"
+    Type: String
+    Default: "127.0.0.1"
+  IotaPmPort:
+    Description: "IOTA-PM API port"
+    Type: Number
+    Default: "9999"
+  NelsonApiPort:
+    Description: "Nelson API Port"
+    Type: Number
+    Default: "18600"
+  NelsonPort:
+    Description: "Nelson Port"
+    Type: Number
+    Default: "16600"
+  NelsonApiIp:
+    Description: "Nelson API IP"
+    Type: String
+    Default: "127.0.0.1"
+
+    
+# Mappings allow us to map a key to a corresponding set of named values
+# So if our instance is brought up in the eu-west-1 region we can use
+# AWS::Region to tell us the current zone and then use the intrinsic function
+# Fn::FindInMap to return the relevant matched value
+Mappings:
+  RegionMap:
+    eu-west-1:
+      AMI: "ami-8fd760f6"
+    eu-central-1: 
+      AMI: "ami-df8406b0"
+# todo add more regions for Ubuntu AMI : Ubuntu Server 16.04 LTS (HVM), SSD Volume Type
+
+# Determine if a keypair name must be used 
+Conditions: 
+  HasKeyName: !Not [ !Equals [ !Ref KeyName, "" ]]
+    
+
+# When pushing this CloudFormation we need to provide the public half of our key-pair
+# See http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
+#
+# Then when attempting to SSH into the instance we can provide the private half
+# See https://gist.github.com/Integralist/438898d6164daebec0c9
+Resources:
+  Ec2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      BlockDeviceMappings:
+        - DeviceName: "/dev/sda1"
+          Ebs:
+            VolumeSize: 50
+            VolumeType: gp2
+      InstanceType: !Ref InstanceTypeParameter
+      KeyName:
+        !If [HasKeyName, !Ref "KeyName", !Ref "AWS::NoValue"]
+      SecurityGroups:
+        - Ref: "InstanceSecurityGroup"
+
+      # Select the correct AMI to load (based on the region the stack is created)
+      ImageId:
+        Fn::FindInMap:
+          - "RegionMap"
+          - Ref: "AWS::Region"
+          - "AMI"
+
+      # Amazon's Linux AMI comes with a Ubuntu package called cloud-init installed
+      # This package simplifies running bootstrapping code on the EC2 instance
+      #
+      # We use the Fn::Base64 function to base64 encode the user data and to
+      # allow parameters and references from the template to be substituted
+      # in the script at runtime
+      #
+      # We also use a curl command to indicate to our WaitCondition resource
+      # that the application has started successfully.
+      # The stack creation will fail if the WaitCondition timeout is triggered.
+      # The timeout is cancelled by the signal of the curl command
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              - "#!/bin/bash -ex"
+              - "\n" 
+              - "apt update -qqy --fix-missing && sudo DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::options::=\"--force-confdef\" -o DPkg::options::=\"--force-confold\" upgrade && sudo apt-get clean -y && sudo apt-get autoremove -y --purge"
+              - "\n" 
+              - "apt install software-properties-common -y && sudo add-apt-repository ppa:webupd8team/java -y && sudo apt update"
+              - "\n"
+              - "echo \"oracle-java8-installer shared/accepted-oracle-license-v1-1 select true\" | debconf-set-selections && echo \"oracle-java8-installer shared/accepted-oracle-license-v1-1 seen true\" | debconf-set-selections"
+              - "\n"
+              - "sudo apt install oracle-java8-installer curl wget jq -y && sudo apt install oracle-java8-set-default -y"
+              - "\n"
+              - "sh -c 'echo JAVA_HOME=\"/usr/lib/jvm/java-8-oracle\" >> /etc/environment' && source /etc/environment"
+              - "\n"
+              - "curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -"
+              - "\n"
+              - "useradd -s /usr/sbin/nologin -m iota"
+              - "\n"
+              - "sudo -u iota mkdir -p /home/iota/node /home/iota/node/ixi /home/iota/node/mainnetdb"
+              - "\n"
+              - "sudo -u iota wget -O /home/iota/node/iri-1.4.1.4.jar https://github.com/iotaledger/iri/releases/download/v1.4.1.4/iri-1.4.1.4.jar"
+              - "\n"
+              - "cat << \"EOF\" | sudo tee /lib/systemd/system/iota.service\n"
+              - "[Unit]\n"
+              - "Description=IOTA IRI full node\n"
+              - "After=network.target\n"
+              - "[Service]\n"
+              - "WorkingDirectory=/home/iota/node\n"
+              - "User=iota\n"
+              - "PrivateDevices=yes\n"
+              - "Type=simple\n"
+              - "ExecReload=/bin/kill -HUP $MAINPID\n"
+              - "KillMode=mixed\n"
+              - "KillSignal=SIGTERM\n"
+              - "TimeoutStopSec=60\n"
+              - "ExecStart=/usr/bin/java -Xmx3g -Djava.net.preferIPv4Stack=true -jar iri-1.4.1.4.jar -c iota.ini\n"
+              - "Restart=on-failure\n"
+              - "RestartSec=30\n"
+              - "[Install]\n"
+              - "WantedBy=multi-user.target\n"
+              - "Alias=iota.service\n"
+              - "EOF\n" 
+              - "sudo systemctl daemon-reload && sudo systemctl enable iota.service \n"
+              - "cat << \"EOF\" | sudo -u iota tee /home/iota/node/iota.ini\n"
+              - "[IRI]\n"
+              - "PORT = "
+              - Ref: "IriApiPort"
+              - "\n"
+              - "UDP_RECEIVER_PORT = "
+              - Ref: "IriUdpPort"
+              - "\n"
+              - "TCP_RECEIVER_PORT = "
+              - Ref: "IriTcpPort"
+              - "\n"
+              - "API_HOST = "
+              - Ref: "IriExternalApiIp"
+              - "\n"
+              - "IXI_DIR = ixi\n"
+              - "HEADLESS = true\n"
+              - "DEBUG = false\n"
+              - "TESTNET = false\n"
+              - "DB_PATH = mainnetdb\n"
+              - "RESCAN_DB = false\n"
+              - "REMOTE_LIMIT_API=\"removeNeighbors, addNeighbors, interruptAttachingToTangle, attachToTangle, getNeighbors\"\n"
+              - "NEIGHBORS = \n"
+              - "EOF\n" 
+              - "cd /tmp/ && curl -O http://db.iota.partners/IOTA.partners-mainnetdb.tar.gz && sudo -u iota tar xzfv /tmp/IOTA.partners-mainnetdb.tar.gz -C /home/iota/node/mainnetdb && rm /tmp/IOTA.partners-mainnetdb.tar.gz"
+              - "\n"
+              - "sudo service iota start\n"
+              - "echo '*/15 * * * * root bash -c \"bash <(curl -s https://gist.githubusercontent.com/zoran/48482038deda9ce5898c00f78d42f801/raw)\"' | sudo tee /etc/cron.d/iri_updater > /dev/null\n" 
+              - "apt-get install -y nodejs\n" 
+              - "sudo npm install -g nelson.cli\n"
+              - "sudo npm install -g iota-pm > /dev/null\n"
+              - "useradd -s /usr/sbin/nologin -m nelson\n" 
+              - "cat << \"EOF\" | sudo -u nelson tee /home/nelson/config.ini\n"
+              - "[nelson]\n"
+              - "cycleInterval = 60\n"
+              - "epochInterval = 300\n"
+              - "apiPort = "
+              - Ref: "NelsonApiPort"
+              - "\n"
+              - "apiHostname = "
+              - Ref: "NelsonApiIp"
+              - "\n"
+              - "port = "
+              - Ref: "NelsonPort"
+              - "\n"
+              - "IRIHostname = "
+              - Ref: "IriInternalApiIp"
+              - "\n"
+              - "IRIPort = "
+              - Ref: "IriApiPort" 
+              - "\n"
+              - "TCPPort = "
+              - Ref: "IriTcpPort"
+              - "\n"
+              - "UDPPort = "
+              - Ref: "IriUdpPort"
+              - "\n"
+              - "dataPath = data/neighbors.db\n"
+              - "isMaster = false\n"
+              - "silent = false\n"
+              - "gui = false\n"
+              - "getNeighbors = https://raw.githubusercontent.com/SemkoDev/nelson.cli/master/ENTRYNODES\n"
+              - "neighbors[] = mainnet.deviota.com/16600\n"
+              - "neighbors[] = mainnet2.deviota.com/16600\n"
+              - "neighbors[] = mainnet3.deviota.com/16600\n"
+              - "neighbors[] = iotairi.tt-tec.net/16600\n"
+              - "EOF\n"
+              - "\n"
+              - "cat << \"EOF\" | sudo tee /lib/systemd/system/nelson.service\n"
+              - "[Unit]\n"
+              - "Description=CarrIOTA Nelson\n"
+              - "After=network.target\n"
+              - "[Service]\n"
+              - "WorkingDirectory=/home/nelson\n"
+              - "User=nelson\n"
+              - "PrivateDevices=yes\n"
+              - "Type=simple\n"
+              - "ExecReload=/bin/kill -HUP $MAINPID\n"
+              - "KillMode=mixed\n"
+              - "KillSignal=SIGTERM\n"
+              - "TimeoutStopSec=60\n"
+              - "ExecStart=/usr/bin/nelson --config /home/nelson/config.ini\n"
+              - "Restart=on-failure\n"
+              - "RestartSec=30\n"
+              - "[Install]\n"
+              - "WantedBy=multi-user.target\n"
+              - "Alias=nelson.service\n"
+              - "EOF\n"
+              - "sudo systemctl daemon-reload && systemctl enable nelson.service\n"
+              - "sudo service nelson start\n" 
+              - "cat << \"EOF\" | sudo tee /lib/systemd/system/iotapm.service\n"
+              - "[Unit]\n"
+              - "Description=Iota Peer Manager\n"
+              - "After=network.target\n"
+              - "[Service]\n"
+              - "WorkingDirectory=/home/iota\n"
+              - "User=iota\n"
+              - "PrivateDevices=yes\n"
+              - "Type=simple\n"
+              - "ExecReload=/bin/kill -HUP $MAINPID\n"
+              - "KillMode=mixed\n"
+              - "KillSignal=SIGTERM\n"
+              - "TimeoutStopSec=60\n"
+              - "ExecStart=/usr/bin/iota-pm -i http://"
+              - Ref: "IriInternalApiIp"
+              - ":"
+              - Ref: "IriApiPort" 
+              - " -p "
+              - Ref: "IotaPmApiIp"
+              - ":"
+              - Ref: "IotaPmPort"
+              - "\n"
+              - "Restart=on-failure\n"
+              - "RestartSec=30\n"
+              - "[Install]\n"
+              - "WantedBy=multi-user.target\n"
+              - "Alias=iotapm.service\n"
+              - "EOF\n"
+              - "\n"
+              - "sudo systemctl daemon-reload && systemctl enable iotapm.service\n"
+              - "sudo service iotapm start\n"
+              - "\n"
+              - "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\","
+              - "\"Reason\" : \"The iota fulle node is ready\","
+              - "\"UniqueId\" : \"Iota\","
+              - "\"Data\" : \"Done\"}' "
+              - "\""
+              - Ref: "WaitForInstanceWaitHandle"
+              - "\"\n"
+  # The following key has no properties.
+  # I know that seems odd but there is a reason:
+  #
+  # When you reference the WaitConditionHandle resource
+  # (see WaitForInstance below and the curl command above),
+  # AWS CloudFormation will return a presigned URL.
+  #
+  # You then pass this URL to applications or scripts that are running on your
+  # Amazon EC2 instances to send signals to that URL
+  WaitForInstanceWaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+    Properties: {}
+
+  # Our WaitCondition depends on the EC2 instance being booted-up first
+  # And then we give the application 900 seconds (15 minutes) to indicate it's running
+  WaitForInstance:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: "Ec2Instance"
+    Properties:
+      Handle:
+        Ref: "WaitForInstanceWaitHandle"
+      Timeout: "900"
+      
+   # We're allowing any ip address to access port 22, 14265, 14600 and 15600
+   # SSH tunnel will be used to access iota-pm
+  InstanceSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Enable Access to our application via port 14265, 14600, 15600 and SSH access via port 22"
+      SecurityGroupIngress:
+        - IpProtocol: "udp"
+          FromPort: "14600"
+          ToPort: "14600"
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: "tcp"
+          FromPort: "22"
+          ToPort: "22"
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: "tcp"
+          FromPort: "14265"
+          ToPort: "14265"
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: "tcp"
+          FromPort: "15600"
+          ToPort: "15600"
+          CidrIp: "0.0.0.0/0"
+
