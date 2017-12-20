@@ -342,15 +342,11 @@ Resources:
 Outputs:
   PortForwardingCommand:
     Description: "This command can be used to access your iota-pm. Ensure you adapt your keypair path (-i \"/mypath to keypair.pem\")"
-    Value:
-      Fn::Join:
-        - ""
-        -
-          - !Sub "ssh -i \"${KeyName}.pem\" -p 22 -L ${IriApiPort}:localhost:${IriApiPort} -L ${IotaPmPort}:localhost:${IotaPmPort} ubuntu@${Ec2Instance.PublicDnsName}"
+    Value: 
+      !If [HasKeyName, 
+        !Sub "ssh -i \"${KeyName}.pem\" -p 22 -L ${IriApiPort}:localhost:${IriApiPort} -L ${IotaPmPort}:localhost:${IotaPmPort} ubuntu@${Ec2Instance.PublicDnsName}"
+        , "Please restart the deployment with an EC2 keypair"]
   IotaPmWebsite:
     Description: "This link allow you to manage your neighboors via browser"
     Value:
-      Fn::Join:
-        - ""
-        -
-          - !Sub "http://${IotaPmApiIp}:${IotaPmPort}"
+     !If [HasKeyName, !Sub "http://${IotaPmApiIp}:${IotaPmPort}" , "Please restart the deployment with an EC2 keypair"]
