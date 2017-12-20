@@ -15,8 +15,8 @@ Parameters:
     Type: String
     Default: ""
   InstanceTypeParameter: 
-    Description: "Enter an EC2 instance type."
     Type: String
+    Description: "Enter an EC2 instance type."
     Default: t2.medium
   IriApiPort:
     Description: "IRI API PORT"
@@ -108,7 +108,6 @@ Conditions:
 #
 # Then when attempting to SSH into the instance we can provide the private half
 # See https://gist.github.com/Integralist/438898d6164daebec0c9
-# ex: ssh -i <your_keypair_name> ubuntu@<your_instance_public_ip>
 Resources:
   Ec2Instance:
     Type: "AWS::EC2::Instance"
