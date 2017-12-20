@@ -2,16 +2,16 @@
 # AWS IOTA Full node
 
 ## Description 
-This cloudformation template deploy a full IOTA node with automatic neighboors setup. 
-Deploying this template will incurs cost.
+This cloudformation template deploys a full IOTA node with automatic neighbors setup. 
+Deploying this template will incur cost.
 You can [estimate the stack cost within the AWS Management console](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-paying.html)
 
 
 
-## Disclamer
-- Working @ AWS, opinions are my own.
-- Deploying this cloudformation template will implies a cost. 
-- This Cloudformation template automatically **accept Oracle-Java-isntaller-8 license**
+## Disclaimer
+- Working @ AWS, any opinions are my own.
+- Deploying this cloudformation template will incur a cost. 
+- This Cloudformation template automatically **accepts Oracle-Java-isntaller-8 license**
 
 ## Requirements
 
@@ -23,18 +23,18 @@ You can [estimate the stack cost within the AWS Management console](http://docs.
 
 ## Description 
 
-This template setup an EC2 instance. 
-When the deployment finish Nelson and IOTA Full node is runing. 
-version: 
-Nelson - 0.2.2
+This template sets up an EC2 instance. 
+When the deployment finishes, Nelson and IOTA Full node will be running. 
 
+Versions: 
+Nelson - 0.2.2
 IRI - 1.4.1.4
 
 ## Let's GO ! 
 
 Note: To connect to your full node instance you need an AWS EC2 KeyPair.
 [How to create an AWS EC2 Keypair](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html)
-This would allow you to use iota-pm to monitor your full node.
+This will allow you to use iota-pm to monitor your full node.
 
 
 ### Setting up IOTA full node from here
@@ -45,10 +45,10 @@ Thanks to [SemkoDev](https://semkodev.com/) for hosting the cloudformation templ
 
 ### Setting up IOTA full node with AWS CLI 
 
-#### Step 1: fetch the template
+#### Step 1: Fetch the template
 `git clone https://github.com/iotFab/iota-aws-full-node.git`
 
-#### Step 2: deploy the template 
+#### Step 2: Deploy the template 
 `aws cloudformation create-stack --stack-name iotaws-full-node --template-body file://iota-aws-full-node/cloudformation.yml --parameters ParameterKey=KeyName,ParameterValue=<Your Keypair name>`
 
 More information:
@@ -56,17 +56,17 @@ More information:
 
 ### Setting up IOTA full node with AWS management console 
 
-#### Step 1: fetch the template
+#### Step 1: Fetch the template
 `git clone https://github.com/iotFab/iota-aws-full-node.git`
 
-#### Step 2: deploy the template 
+#### Step 2: Deploy the template 
 Follow the step by step  http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console.html
 
 
 ### Monitor your IOTA node
 
 If you have deployed the stack with a KeyPair, you should see the command in your stack outputs. 
-This command enable port forwarding between your EC2 instance to your computer. 
+This command enables port forwarding between your EC2 instance to your computer. 
 
 This will looks like : 
 
