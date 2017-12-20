@@ -336,3 +336,21 @@ Resources:
           ToPort: "15600"
           CidrIp: "0.0.0.0/0"
 
+# The optional Outputs section declares the values that you want to return
+# in response to describe stack calls.
+# This output appears in the AWS console
+Outputs:
+  PortForwardingCommand:
+    Description: "This command can be used to access your iota-pm. Ensure you adapt your keypair path (-i \"/mypath to keypair.pem\")"
+    Value:
+      Fn::Join:
+        - ""
+        -
+          - !Sub "ssh -i \"${KeyName}.pem\" -p 22 -L ${IriApiPort}:localhost:${IriApiPort} -L ${IotaPmPort}:localhost:${IotaPmPort} ubuntu@${Ec2Instance.PublicDnsName}"
+  IotaPmWebsite:
+    Description: "This link allow you to manage your neighboors via browser"
+    Value:
+      Fn::Join:
+        - ""
+        -
+          - !Sub "http://${IotaPmApiIp}:${IotaPmPort}"

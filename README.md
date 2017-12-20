@@ -32,8 +32,14 @@ IRI - 1.4.1.4
 
 ## Let's GO ! 
 
+Note: To connect to your full node instance you need an AWS EC2 KeyPair.
+[How to create an AWS EC2 Keypair](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html)
+This would allow you to use iota-pm to monitor your full node.
+
+
 ### Setting up IOTA full node from here
 Thanks to [SemkoDev](https://semkodev.com/) for hosting the cloudformation template on S3. 
+
 
 [![alt text](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=IotaAwsFullNode&templateURL=https://s3-eu-west-1.amazonaws.com/nelson-iri/cloudformation.yml)
 
@@ -47,8 +53,6 @@ Thanks to [SemkoDev](https://semkodev.com/) for hosting the cloudformation templ
 
 More information:
 [AWS Cloudformation CLI commands](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-cli.html)
-[Create an AWS EC2 Keypair](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html)
-
 
 ### Setting up IOTA full node with AWS management console 
 
@@ -57,6 +61,26 @@ More information:
 
 #### Step 2: deploy the template 
 Follow the step by step  http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console.html
+
+
+### Monitor your IOTA node
+
+If you have deployed the stack with a KeyPair, you should see the command in your stack outputs. 
+This command enable port forwarding between your EC2 instance to your computer. 
+
+This will looks like : 
+
+`ssh -i "<your keypair>" -p 22 -L <your iota-pm-api-port>:localhost:<your iota-pm-api-port> ubuntu@<your ec2 ip>`
+
+You can access in your browser `http://127.0.0.1:<your iota-pm-api-port>` until you shutdown the ssh connection.
+
+To access this output section once the deployment is completed, you have 2 options : 
+##### From AWS CLI:
+`aws cloudformation describe-stack-events --stack-name iotaws-full-node`
+
+##### From AWS Management Console: 
+[Access AWS Console management Stack output section](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-view-stack-data-resources.html)
+
 
 ## Contributing
 - Donations always welcome: 
@@ -74,8 +98,7 @@ Thank you to http://iota.partners/ for providing DB storage and clear step by st
 - Add more parameters from Nelson and IRI in the template
 - Provide [Amazon Elastic Ip](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html) as an option 
 - Extend the region supported by this template
-
-
+- Integration with Cloudwatch logs or Cloudwatch custom metrics
 
 ## License
 Licensed under the [MIT license](https://opensource.org/licenses/mit-license.php).
