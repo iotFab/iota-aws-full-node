@@ -15,8 +15,8 @@ Parameters:
     Type: String
     Default: ""
   InstanceTypeParameter: 
-    Type: String 
     Description: "Enter an EC2 instance type."
+    Type: String
     Default: t2.medium
   IriApiPort:
     Description: "IRI API PORT"
@@ -66,10 +66,36 @@ Parameters:
 # Fn::FindInMap to return the relevant matched value
 Mappings:
   RegionMap:
+    us-west-1:
+      AMI: "ami-45ead225"
+    us-west-2:
+      AMI: "ami-0def3275"
+    us-east-1:
+      AMI: "ami-aa2ea6d0"
+    us-east-2:
+      AMI: "ami-82f4dae7"
+    ca-central-1:
+      AMI: "ami-018b3065"
     eu-west-1:
       AMI: "ami-8fd760f6"
+    eu-west-2:
+      AMI: "ami-fcc4db98"
+    eu-west-3:
+      AMI: "ami-4262d53f"
     eu-central-1: 
       AMI: "ami-df8406b0"
+    ap-northeast-1:
+      AMI: "ami-bec974d8"
+    ap-northeast-2:
+      AMI: "ami-3066c15e"
+    ap-southeast-1:
+      AMI: "ami-10acfb73"
+    ap-southeast-2:
+      AMI: "ami-cab258a8"
+    ap-south-1:
+      AMI: "ami-f3e5aa9c"
+    sa-east-1:
+      AMI: "ami-bf8ecbd3"
 # todo add more regions for Ubuntu AMI : Ubuntu Server 16.04 LTS (HVM), SSD Volume Type
 
 # Determine if a keypair name must be used 
@@ -82,6 +108,7 @@ Conditions:
 #
 # Then when attempting to SSH into the instance we can provide the private half
 # See https://gist.github.com/Integralist/438898d6164daebec0c9
+# ex: ssh -i <your_keypair_name> ubuntu@<your_instance_public_ip>
 Resources:
   Ec2Instance:
     Type: "AWS::EC2::Instance"
