@@ -97,7 +97,6 @@ Thank you to http://iota.partners/ for providing DB storage and clear step by st
 - Setup [auto-scaling group](http://docs.aws.amazon.com/autoscaling/latest/userguide/AutoScalingGroup.html)
 - Add more parameters from Nelson and IRI in the template
 - Provide [Amazon Elastic Ip](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html) as an option 
-- Extend the region supported by this template
 - Integration with Cloudwatch logs or Cloudwatch custom metrics
 
 ## License
