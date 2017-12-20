@@ -96,7 +96,6 @@ Mappings:
       AMI: "ami-f3e5aa9c"
     sa-east-1:
       AMI: "ami-bf8ecbd3"
-# todo add more regions for Ubuntu AMI : Ubuntu Server 16.04 LTS (HVM), SSD Volume Type
 
 # Determine if a keypair name must be used 
 Conditions: 
