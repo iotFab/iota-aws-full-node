@@ -32,6 +32,11 @@ IRI - 1.4.1.4
 
 ## Let's GO ! 
 
+### Setting up IOTA full node from here
+Thanks to [SemkoDev](https://semkodev.com/) for hosting the cloudformation template on S3. 
+
+[![alt text](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/new?stackName=IotaAwsFullNode&templateURL=https://s3-eu-west-1.amazonaws.com/nelson-iri/cloudformation.yml)
+
 ### Setting up IOTA full node with AWS CLI 
 
 #### Step 1: fetch the template
