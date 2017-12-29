@@ -73,8 +73,15 @@ Parameters:
     Description: "Enter the Nelson API IP"
     Type: String
     Default: "127.0.0.1"
-
-
+  NelsonIncomingMaxParameter:
+    Description: "Maximum Nelson incoming connection"
+    Type: Number
+    Default: "5"
+  NelsonOutgoingMaxParameter:
+    Description: "Maximum Nelson outgoing connection"
+    Type: Number
+    Default: "4"
+              
 # Mappings allow us to map a key to a corresponding set of named values
 # So if our instance is brought up in the eu-west-1 region we can use
 # AWS::Region to tell us the current zone and then use the intrinsic function
@@ -262,6 +269,12 @@ Resources:
               - "\n"
               - "UDPPort = "
               - Ref: "IriUdpPortParameter"
+              - "\n"
+              - "incomingMax = "
+              - Ref: "NelsonIncomingMaxParameter"
+              - "\n"
+              - "outgoingMax = "
+              - Ref: "NelsonOutgoingMaxParameter"
               - "\n"
               - "dataPath = data/neighbors.db\n"
               - "isMaster = false\n"
