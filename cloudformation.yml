@@ -14,16 +14,6 @@ Parameters:
     Description: "Optional: Name of an existing EC2 KeyPair to enable SSH access to the instance"
     Type: String
     Default: ""
-  SubnetIdParameter:
-    Description: "Enter the existing subnet ID in which the EC2 instance will be created (ex: sg-342109b9)"
-    Type: String
-    Default: ""
-    ConstraintDescription: "[A-Za-z]+-[A-Za-z]+"
-  VpcIdParameter:
-    Description: "Enter the existing VPC ID which contains the subnet ID from above (ex: vpc-13455b74)"
-    Type: String
-    Default: ""
-    ConstraintDescription: "[A-Za-z]+-[A-Za-z]+"
   TimeoutCfStackCreation:
     Description: "Enter the CloudFormation stack creation timeout (in seconds)"
     Type: String
@@ -151,7 +141,6 @@ Resources:
           - Ref: "AWS::Region"
           - "AMI"
 
-      SubnetId: !Ref SubnetIdParameter
       Tags:
         -
           Key: 'Name'
@@ -401,7 +390,6 @@ Resources:
         -
           Key: "Name"
           Value: "IOTA full node security group"
-      VpcId: !Ref VpcIdParameter
 
 # The optional Outputs section declares the values that you want to return
 # in response to describe stack calls.
