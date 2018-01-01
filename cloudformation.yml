@@ -143,8 +143,8 @@ Resources:
 
       Tags:
         -
-          Key: 'Name'
-          Value: 'IOTA full node EC2 instance'
+          Key: "Name"
+          Value: !Sub "IOTA full node EC2 instance (${AWS::StackName})"
 
       # Amazon's Linux AMI comes with a Ubuntu package called cloud-init installed
       # This package simplifies running bootstrapping code on the EC2 instance
@@ -344,7 +344,7 @@ Resources:
   #
   # When you reference the WaitConditionHandle resource
   # (see WaitForInstance below and the curl command above),
-  # AWS CloudFormation will return a presigned URL.
+  # AWS CloudFormation will return a pre-signed URL.
   #
   # You then pass this URL to applications or scripts that are running on your
   # Amazon EC2 instances to send signals to that URL
@@ -353,7 +353,7 @@ Resources:
     Properties: {}
 
   # Our WaitCondition depends on the EC2 instance being booted-up first
-  # And then we give the application 900 seconds (15 minutes) to indicate it's running
+  # CloudFormation parameter 'TimeoutCfStackCreation' specifies the number of seconds to wait
   WaitForInstance:
     Type: "AWS::CloudFormation::WaitCondition"
     DependsOn: "Ec2Instance"
@@ -362,12 +362,12 @@ Resources:
         Ref: "WaitForInstanceWaitHandle"
       Timeout: !Ref TimeoutCfStackCreation
 
-   # We're allowing any ip address to access port 22, 14265, 14600 and 15600
+   # We're allowing any IP address to access port 22, 14265, 14600 and 15600
    # SSH tunnel will be used to access iota-pm
   Ec2InstanceSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
-      GroupName: "IOTA full node security group"
+      GroupName: !Sub "IOTA full node security group (${AWS::StackName})"
       GroupDescription: "Enable access to IOTA full node via ports 14265, 14600, 15600 and SSH access via port 22"
       SecurityGroupIngress:
         - IpProtocol: "udp"
@@ -389,18 +389,17 @@ Resources:
       Tags:
         -
           Key: "Name"
-          Value: "IOTA full node security group"
+          Value: !Sub "IOTA full node security group (${AWS::StackName})"
 
 # The optional Outputs section declares the values that you want to return
 # in response to describe stack calls.
 # This output appears in the AWS console
 Outputs:
   PortForwardingCommand:
-    Description: "This command can be used to access your iota-pm. Ensure you adapt your keypair path (-i \"/mypath to keypair.pem\")"
+    Description: "This command can be used to access your iota-pm. Ensure you adapt your keypair path (-i \"/mypath/to/keypair.pem\")"
     Value:
-      !If [HasKeyName,
-        !Sub "ssh -i \"${KeyNameParameter}.pem\" -p 22 -L ${IriApiPortParameter}:localhost:${IriApiPortParameter} -L ${IotaPmPortParameter}:localhost:${IotaPmPortParameter} ubuntu@${Ec2Instance.PublicDnsName}"
-        , "Please restart the deployment with an EC2 keypair"]
+      !If [HasKeyName, !Sub "ssh -i \"${KeyNameParameter}.pem\" -p 22 -L ${IriApiPortParameter}:localhost:${IriApiPortParameter} -L ${IotaPmPortParameter}:localhost:${IotaPmPortParameter} ubuntu@${Ec2Instance.PublicDnsName}",
+           "Please restart the deployment with an EC2 keypair"]
   IotaPmWebsite:
     Description: "This link allow you to manage your neighbours via browser"
     Value:
