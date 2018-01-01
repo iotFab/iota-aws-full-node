@@ -404,3 +404,7 @@ Outputs:
     Description: "This link allow you to manage your neighbours via browser"
     Value:
      !If [HasKeyName, !Sub "http://${IotaPmApiIpParameter}:${IotaPmPortParameter}" , "Please restart the deployment with an EC2 keypair"]
+  CustomNodeURL:
+    Description: "This address can be used to connect your wallet directly to your node"
+    Value:
+      !Sub "http://${Ec2Instance.PublicDnsName}:${IriApiPortParameter}"
