@@ -1,61 +1,66 @@
 #adapted from : https://github.com/Integralist/CloudFormation/blob/master/EC2.yml
 
-AWSTemplateFormatVersion: '2010-09-09' 
+AWSTemplateFormatVersion: 2010-09-09
 
-# Paramaters are referenced using the Ref property
-# e.g. Ref: "KeyName"
+# Parameters are referenced using the Ref property
+# e.g. Ref: KeyNameParameter
 #
 # Parameters can be assigned a default value, but if not then the value
 # needs to be provided when uploading the CloudFormation.
 # If uploading via CLI then you'll provide a --parameters flag
 # If uploading via the AWS console, a GUI will be provided
 Parameters:
-  KeyName:
+  KeyNameParameter:
     Description: "Optional: Name of an existing EC2 KeyPair to enable SSH access to the instance"
     Type: String
     Default: ""
-  InstanceTypeParameter: 
+  TimeoutCfStackCreation:
+    Description: "Enter the CloudFormation stack creation timeout (in seconds)"
     Type: String
-    Description: "Enter an EC2 instance type."
+    Default: 3600
+    ConstraintDescription: "[0-9]+"
+  InstanceTypeParameter:
+    Type: String
+    Description: "Enter an EC2 instance type"
     Default: t2.medium
-  IriApiPort:
-    Description: "IRI API PORT"
+  IriApiPortParameter:
+    Description: "Enter the IOTA IRI API port"
     Type: Number
     Default: "14265"
-  IriUdpPort:
-    Description: "IRI UDP PORT"
+  IriUdpPortParameter:
+    Description: "Enter the IOTA IRI UDP port"
     Type: Number
     Default: "14600"
-  IriTcpPort:
-    Description: "IRI TCP PORT"
+  IriTcpPortParameter:
+    Description: "Enter the IOTA IRI TCP port"
     Type: Number
     Default: "15600"
-  IriExternalApiIp:
-    Description: "IRI External API IP"
+  IriExternalApiIpParameter:
+    Description: "Enter the IOTA IRI external API IP"
     Type: String
     Default: "0.0.0.0"
-  IriInternalApiIp:
-    Description: "IRI Internal API IP"
+  IriInternalApiIpParameter:
+    Description: "Enter the IOTA IRI internal API IP"
     Type: String
     Default: "127.0.0.1"
-  IotaPmApiIp:
-    Description: "IOTA-PM API IP"
+  IotaPmApiIpParameter:
+    Description: "Enter the IOTA-pm API IP"
     Type: String
     Default: "127.0.0.1"
-  IotaPmPort:
-    Description: "IOTA-PM API port"
+  IotaPmPortParameter:
+    Description: "Enter the IOTA-pm API port"
     Type: Number
     Default: "9999"
-  NelsonApiPort:
-    Description: "Nelson API Port"
+  NelsonApiPortParameter:
+    Description: "Enter the Nelson API port"
     Type: Number
     Default: "18600"
-  NelsonPort:
-    Description: "Nelson Port"
+  NelsonPortParameter:
+    Description: "Enter the Nelson port"
     Type: Number
     Default: "16600"
-  NelsonApiIp:
-    Description: "Nelson API IP"
+  NelsonApiIpParameter:
+    Description: "Enter the Nelson API IP"
     Type: String
     Default: "127.0.0.1"
   NelsonIncomingMaxParameter:
@@ -89,7 +94,7 @@ Mappings:
       AMI: "ami-fcc4db98"
     eu-west-3:
       AMI: "ami-4262d53f"
-    eu-central-1: 
+    eu-central-1:
       AMI: "ami-df8406b0"
     ap-northeast-1:
       AMI: "ami-bec974d8"
@@ -104,10 +109,10 @@ Mappings:
     sa-east-1:
       AMI: "ami-bf8ecbd3"
 
-# Determine if a keypair name must be used 
-Conditions: 
-  HasKeyName: !Not [ !Equals [ !Ref KeyName, "" ]]
-    
+# Determine if a keypair name must be used
+Conditions:
+  HasKeyName: !Not [ !Equals [ !Ref KeyNameParameter, "" ]]
+
 
 # When pushing this CloudFormation we need to provide the public half of our key-pair
 # See http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
@@ -125,9 +130,9 @@ Resources:
             VolumeType: gp2
       InstanceType: !Ref InstanceTypeParameter
       KeyName:
-        !If [HasKeyName, !Ref "KeyName", !Ref "AWS::NoValue"]
-      SecurityGroups:
-        - Ref: "InstanceSecurityGroup"
+        !If [HasKeyName, !Ref KeyNameParameter, !Ref "AWS::NoValue"]
+      SecurityGroupIds:
+        - !Ref Ec2InstanceSecurityGroup
 
       # Select the correct AMI to load (based on the region the stack is created)
       ImageId:
@@ -135,6 +140,11 @@ Resources:
           - "RegionMap"
           - Ref: "AWS::Region"
           - "AMI"
+
+      Tags:
+        -
+          Key: "Name"
+          Value: !Sub "IOTA full node EC2 instance (${AWS::StackName})"
 
       # Amazon's Linux AMI comes with a Ubuntu package called cloud-init installed
       # This package simplifies running bootstrapping code on the EC2 instance
@@ -153,9 +163,9 @@ Resources:
             - ""
             -
               - "#!/bin/bash -ex"
-              - "\n" 
+              - "\n"
               - "apt update -qqy --fix-missing && sudo DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::options::=\"--force-confdef\" -o DPkg::options::=\"--force-confold\" upgrade && sudo apt-get clean -y && sudo apt-get autoremove -y --purge"
-              - "\n" 
+              - "\n"
               - "apt install software-properties-common -y && sudo add-apt-repository ppa:webupd8team/java -y && sudo apt update"
               - "\n"
               - "echo \"oracle-java8-installer shared/accepted-oracle-license-v1-1 select true\" | debconf-set-selections && echo \"oracle-java8-installer shared/accepted-oracle-license-v1-1 seen true\" | debconf-set-selections"
@@ -191,21 +201,21 @@ Resources:
               - "[Install]\n"
               - "WantedBy=multi-user.target\n"
               - "Alias=iota.service\n"
-              - "EOF\n" 
+              - "EOF\n"
               - "sudo systemctl daemon-reload && sudo systemctl enable iota.service \n"
               - "cat << \"EOF\" | sudo -u iota tee /home/iota/node/iota.ini\n"
               - "[IRI]\n"
               - "PORT = "
-              - Ref: "IriApiPort"
+              - Ref: "IriApiPortParameter"
               - "\n"
               - "UDP_RECEIVER_PORT = "
-              - Ref: "IriUdpPort"
+              - Ref: "IriUdpPortParameter"
               - "\n"
               - "TCP_RECEIVER_PORT = "
-              - Ref: "IriTcpPort"
+              - Ref: "IriTcpPortParameter"
               - "\n"
               - "API_HOST = "
-              - Ref: "IriExternalApiIp"
+              - Ref: "IriExternalApiIpParameter"
               - "\n"
               - "IXI_DIR = ixi\n"
               - "HEADLESS = true\n"
@@ -215,39 +225,39 @@ Resources:
               - "RESCAN_DB = false\n"
               - "REMOTE_LIMIT_API=\"removeNeighbors, addNeighbors, interruptAttachingToTangle, attachToTangle, getNeighbors\"\n"
               - "NEIGHBORS = \n"
-              - "EOF\n" 
+              - "EOF\n"
               - "cd /tmp/ && curl -O http://db.iota.partners/IOTA.partners-mainnetdb.tar.gz && sudo -u iota tar xzfv /tmp/IOTA.partners-mainnetdb.tar.gz -C /home/iota/node/mainnetdb && rm /tmp/IOTA.partners-mainnetdb.tar.gz"
               - "\n"
               - "sudo service iota start\n"
-              - "echo '*/15 * * * * root bash -c \"bash <(curl -s https://gist.githubusercontent.com/zoran/48482038deda9ce5898c00f78d42f801/raw)\"' | sudo tee /etc/cron.d/iri_updater > /dev/null\n" 
-              - "apt-get install -y nodejs\n" 
+              - "echo '*/15 * * * * root bash -c \"bash <(curl -s https://gist.githubusercontent.com/zoran/48482038deda9ce5898c00f78d42f801/raw)\"' | sudo tee /etc/cron.d/iri_updater > /dev/null\n"
+              - "apt-get install -y nodejs\n"
               - "sudo npm install -g nelson.cli\n"
               - "sudo npm install -g iota-pm > /dev/null\n"
-              - "useradd -s /usr/sbin/nologin -m nelson\n" 
+              - "useradd -s /usr/sbin/nologin -m nelson\n"
               - "cat << \"EOF\" | sudo -u nelson tee /home/nelson/config.ini\n"
               - "[nelson]\n"
               - "cycleInterval = 60\n"
               - "epochInterval = 300\n"
               - "apiPort = "
-              - Ref: "NelsonApiPort"
+              - Ref: "NelsonApiPortParameter"
               - "\n"
               - "apiHostname = "
-              - Ref: "NelsonApiIp"
+              - Ref: "NelsonApiIpParameter"
               - "\n"
               - "port = "
-              - Ref: "NelsonPort"
+              - Ref: "NelsonPortParameter"
               - "\n"
               - "IRIHostname = "
-              - Ref: "IriInternalApiIp"
+              - Ref: "IriInternalApiIpParameter"
               - "\n"
               - "IRIPort = "
-              - Ref: "IriApiPort" 
+              - Ref: "IriApiPortParameter"
               - "\n"
               - "TCPPort = "
-              - Ref: "IriTcpPort"
+              - Ref: "IriTcpPortParameter"
               - "\n"
               - "UDPPort = "
-              - Ref: "IriUdpPort"
+              - Ref: "IriUdpPortParameter"
               - "\n"
               - "incomingMax = "
               - Ref: "NelsonIncomingMaxParameter"
@@ -287,7 +297,7 @@ Resources:
               - "Alias=nelson.service\n"
               - "EOF\n"
               - "sudo systemctl daemon-reload && systemctl enable nelson.service\n"
-              - "sudo service nelson start\n" 
+              - "sudo service nelson start\n"
               - "cat << \"EOF\" | sudo tee /lib/systemd/system/iotapm.service\n"
               - "[Unit]\n"
               - "Description=Iota Peer Manager\n"
@@ -302,13 +312,13 @@ Resources:
               - "KillSignal=SIGTERM\n"
               - "TimeoutStopSec=60\n"
               - "ExecStart=/usr/bin/iota-pm -i http://"
-              - Ref: "IriInternalApiIp"
+              - Ref: "IriInternalApiIpParameter"
               - ":"
-              - Ref: "IriApiPort" 
+              - Ref: "IriApiPortParameter"
               - " -p "
-              - Ref: "IotaPmApiIp"
+              - Ref: "IotaPmApiIpParameter"
               - ":"
-              - Ref: "IotaPmPort"
+              - Ref: "IotaPmPortParameter"
               - "\n"
               - "Restart=on-failure\n"
               - "RestartSec=30\n"
@@ -327,12 +337,14 @@ Resources:
               - "\""
               - Ref: "WaitForInstanceWaitHandle"
               - "\"\n"
+
+
   # The following key has no properties.
   # I know that seems odd but there is a reason:
   #
   # When you reference the WaitConditionHandle resource
   # (see WaitForInstance below and the curl command above),
-  # AWS CloudFormation will return a presigned URL.
+  # AWS CloudFormation will return a pre-signed URL.
   #
   # You then pass this URL to applications or scripts that are running on your
   # Amazon EC2 instances to send signals to that URL
@@ -341,21 +353,22 @@ Resources:
     Properties: {}
 
   # Our WaitCondition depends on the EC2 instance being booted-up first
-  # And then we give the application 900 seconds (15 minutes) to indicate it's running
+  # CloudFormation parameter 'TimeoutCfStackCreation' specifies the number of seconds to wait
   WaitForInstance:
     Type: "AWS::CloudFormation::WaitCondition"
     DependsOn: "Ec2Instance"
     Properties:
       Handle:
         Ref: "WaitForInstanceWaitHandle"
-      Timeout: "900"
-      
-   # We're allowing any ip address to access port 22, 14265, 14600 and 15600
+      Timeout: !Ref TimeoutCfStackCreation
+
+   # We're allowing any IP address to access port 22, 14265, 14600 and 15600
    # SSH tunnel will be used to access iota-pm
-  InstanceSecurityGroup:
+  Ec2InstanceSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
-      GroupDescription: "Enable Access to our application via port 14265, 14600, 15600 and SSH access via port 22"
+      GroupName: !Sub "IOTA full node security group (${AWS::StackName})"
+      GroupDescription: "Enable access to IOTA full node via ports 14265, 14600, 15600 and SSH access via port 22"
       SecurityGroupIngress:
         - IpProtocol: "udp"
           FromPort: "14600"
@@ -373,18 +386,21 @@ Resources:
           FromPort: "15600"
           ToPort: "15600"
           CidrIp: "0.0.0.0/0"
+      Tags:
+        -
+          Key: "Name"
+          Value: !Sub "IOTA full node security group (${AWS::StackName})"
 
 # The optional Outputs section declares the values that you want to return
 # in response to describe stack calls.
 # This output appears in the AWS console
 Outputs:
   PortForwardingCommand:
-    Description: "This command can be used to access your iota-pm. Ensure you adapt your keypair path (-i \"/mypath to keypair.pem\")"
-    Value: 
-      !If [HasKeyName, 
-        !Sub "ssh -i \"${KeyName}.pem\" -p 22 -L ${IriApiPort}:localhost:${IriApiPort} -L ${IotaPmPort}:localhost:${IotaPmPort} ubuntu@${Ec2Instance.PublicDnsName}"
-        , "Please restart the deployment with an EC2 keypair"]
-  IotaPmWebsite:
-    Description: "This link allow you to manage your neighboors via browser"
+    Description: "This command can be used to access your iota-pm. Ensure you adapt your keypair path (-i \"/mypath/to/keypair.pem\")"
     Value:
-     !If [HasKeyName, !Sub "http://${IotaPmApiIp}:${IotaPmPort}" , "Please restart the deployment with an EC2 keypair"]
+      !If [HasKeyName, !Sub "ssh -i \"${KeyNameParameter}.pem\" -p 22 -L ${IriApiPortParameter}:localhost:${IriApiPortParameter} -L ${IotaPmPortParameter}:localhost:${IotaPmPortParameter} ubuntu@${Ec2Instance.PublicDnsName}",
+           "Please restart the deployment with an EC2 keypair"]
+  IotaPmWebsite:
+    Description: "This link allow you to manage your neighbours via browser"
+    Value:
+     !If [HasKeyName, !Sub "http://${IotaPmApiIpParameter}:${IotaPmPortParameter}" , "Please restart the deployment with an EC2 keypair"]
