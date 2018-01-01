@@ -62,7 +62,6 @@ More information:
 #### Step 2: Deploy the template 
 Follow the step by step  http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-console.html
 
-
 ### Monitor your IOTA node
 
 If you have deployed the stack with a KeyPair, you should see the command in your stack outputs. 
@@ -81,6 +80,13 @@ To access this output section once the deployment is completed, you have 2 optio
 ##### From AWS Management Console: 
 [Access AWS Console management Stack output section](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-view-stack-data-resources.html)
 
+### Connect wallet with your IOTA node
+
+To connect a wallet to your node refer to CustomNodeURL variable in your cloudformation output section.
+
+Note: Your node need to be synced for this operation
+
+You can also setup an Elastic IP to have a fixed public URL. 
 
 ## Contributing
 - Donations always welcome: 
