@@ -27,7 +27,7 @@ This template sets up an EC2 instance.
 When the deployment finishes, Nelson and IOTA Full node will be running. 
 
 Versions: 
-Nelson - 0.2.5
+Nelson - 0.3.0
 IRI - 1.4.1.4
 
 ## Let's GO ! 
