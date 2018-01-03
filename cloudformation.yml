@@ -71,7 +71,10 @@ Parameters:
     Description: "Maximum Nelson outgoing connection"
     Type: Number
     Default: "4"
-              
+  NelsoCliVersion:
+    Description: "Nelson CLI version"
+    Type: String
+    Default: "0.3.5"
 # Mappings allow us to map a key to a corresponding set of named values
 # So if our instance is brought up in the eu-west-1 region we can use
 # AWS::Region to tell us the current zone and then use the intrinsic function
@@ -231,7 +234,7 @@ Resources:
               - "sudo service iota start\n"
               - "echo '*/15 * * * * root bash -c \"bash <(curl -s https://gist.githubusercontent.com/zoran/48482038deda9ce5898c00f78d42f801/raw)\"' | sudo tee /etc/cron.d/iri_updater > /dev/null\n"
               - "apt-get install -y nodejs\n"
-              - "sudo npm install -g nelson.cli@0.3.0\n"
+              - !Sub "sudo npm install -g nelson.cli@${NelsoCliVersion}\n"
               - "sudo npm install -g iota-pm > /dev/null\n"
               - "useradd -s /usr/sbin/nologin -m nelson\n"
               - "cat << \"EOF\" | sudo -u nelson tee /home/nelson/config.ini\n"
