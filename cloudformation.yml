@@ -129,13 +129,14 @@ Resources:
       BlockDeviceMappings:
         - DeviceName: "/dev/sda1"
           Ebs:
-            VolumeSize: 50
+            VolumeSize: 25
             VolumeType: gp2
       InstanceType: !Ref InstanceTypeParameter
       KeyName:
         !If [HasKeyName, !Ref KeyNameParameter, !Ref "AWS::NoValue"]
       SecurityGroupIds:
         - !Ref Ec2InstanceSecurityGroup
+        - !If [HasKeyName, !Ref Ec2InstanceSecurityGroupSsh, !Ref "AWS::NoValue"]
 
       # Select the correct AMI to load (based on the region the stack is created)
       ImageId:
@@ -378,8 +379,8 @@ Resources:
           ToPort: "14600"
           CidrIp: "0.0.0.0/0"
         - IpProtocol: "tcp"
-          FromPort: "22"
-          ToPort: "22"
+          FromPort: "16600"
+          ToPort: "16600"
           CidrIp: "0.0.0.0/0"
         - IpProtocol: "tcp"
           FromPort: "14265"
@@ -394,6 +395,21 @@ Resources:
           Key: "Name"
           Value: !Sub "IOTA full node security group (${AWS::StackName})"
 
+  Ec2InstanceSecurityGroupSsh:
+    Type: "AWS::EC2::SecurityGroup"
+    Condition: HasKeyName
+    Properties:
+      GroupName: !Sub "IOTA full node security group ssh (${AWS::StackName})"
+      GroupDescription: "Enable SSH access via port 22"
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: "22"
+          ToPort: "22"
+          CidrIp: "0.0.0.0/0"
+      Tags:
+        -
+          Key: "Name"
+          Value: !Sub "IOTA full node security group ssh (${AWS::StackName})"
 # The optional Outputs section declares the values that you want to return
 # in response to describe stack calls.
 # This output appears in the AWS console
