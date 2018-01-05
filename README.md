@@ -6,7 +6,14 @@ This cloudformation template deploys a full IOTA node with automatic neighbors s
 Deploying this template will incur cost.
 You can [estimate the stack cost within the AWS Management console](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-paying.html)
 
+This template sets up an EC2 instance.
+When the deployment finishes, Nelson and IOTA Full node will be running.
 
+Versions:
+
+IRI - 1.4.1.4
+
+Nelson - 0.3.5 (You can specify new version through template's parameters)
 
 ## Disclaimer
 - Working @ AWS, any opinions are my own.
@@ -19,18 +26,6 @@ You can [estimate the stack cost within the AWS Management console](http://docs.
 - [Setup AWS CLI](https://aws.amazon.com/cli/?nc1=h_ls)
 - Enough privileges to deploy the cloudformation template.
 - [Review Oracle Java 8 license before proceeding](http://www.oracle.com/technetwork/java/javase/terms/license/index.html)
-
-
-## Description 
-
-This template sets up an EC2 instance. 
-When the deployment finishes, Nelson and IOTA Full node will be running. 
-
-Versions: 
-
-IRI - 1.4.1.4
-
-Nelson - 0.3.5 (You can specify new version through template's parameters)
 
 ## Let's GO ! 
 
