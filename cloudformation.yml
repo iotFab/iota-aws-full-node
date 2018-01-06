@@ -71,10 +71,15 @@ Parameters:
     Description: "Maximum Nelson outgoing connection"
     Type: Number
     Default: "4"
-  NelsoCliVersion:
+  NelsoCliVersionParameter:
     Description: "Nelson CLI version"
     Type: String
-    Default: "0.3.5"
+    Default: "0.3.8"
+  IriVersionParameter:
+    Description: "IRI version"
+    Type: String
+    Default: "1.4.1.6"
+
 # Mappings allow us to map a key to a corresponding set of named values
 # So if our instance is brought up in the eu-west-1 region we can use
 # AWS::Region to tell us the current zone and then use the intrinsic function
@@ -184,7 +189,7 @@ Resources:
               - "\n"
               - "sudo -u iota mkdir -p /home/iota/node /home/iota/node/ixi /home/iota/node/mainnetdb"
               - "\n"
-              - "sudo -u iota wget -O /home/iota/node/iri-1.4.1.4.jar https://github.com/iotaledger/iri/releases/download/v1.4.1.4/iri-1.4.1.4.jar"
+              - !Sub "sudo -u iota wget -O /home/iota/node/iri-${IriVersionParameter}.jar https://github.com/iotaledger/iri/releases/download/v${IriVersionParameter}/iri-${IriVersionParameter}.jar"
               - "\n"
               - "cat << \"EOF\" | sudo tee /lib/systemd/system/iota.service\n"
               - "[Unit]\n"
@@ -199,7 +204,7 @@ Resources:
               - "KillMode=mixed\n"
               - "KillSignal=SIGTERM\n"
               - "TimeoutStopSec=60\n"
-              - "ExecStart=/usr/bin/java -Xmx3g -Djava.net.preferIPv4Stack=true -jar iri-1.4.1.4.jar -c iota.ini\n"
+              - !Sub "ExecStart=/usr/bin/java -Xmx3g -Djava.net.preferIPv4Stack=true -jar iri-${IriVersionParameter}.jar -c iota.ini\n"
               - "Restart=on-failure\n"
               - "RestartSec=30\n"
               - "[Install]\n"
@@ -235,13 +240,14 @@ Resources:
               - "sudo service iota start\n"
               - "echo '*/15 * * * * root bash -c \"bash <(curl -s https://gist.githubusercontent.com/zoran/48482038deda9ce5898c00f78d42f801/raw)\"' | sudo tee /etc/cron.d/iri_updater > /dev/null\n"
               - "apt-get install -y nodejs\n"
-              - !Sub "sudo npm install -g nelson.cli@${NelsoCliVersion}\n"
+              - !Sub "sudo npm install -g nelson.cli@${NelsoCliVersionParameter}\n"
               - "sudo npm install -g iota-pm > /dev/null\n"
               - "useradd -s /usr/sbin/nologin -m nelson\n"
               - "cat << \"EOF\" | sudo -u nelson tee /home/nelson/config.ini\n"
               - "[nelson]\n"
               - "cycleInterval = 60\n"
               - "epochInterval = 300\n"
+              - "IRIProtocol = any\n"
               - "apiPort = "
               - Ref: "NelsonApiPortParameter"
               - "\n"
