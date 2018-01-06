@@ -13,7 +13,7 @@ Versions:
 
 IRI - 1.4.1.6
 
-Nelson - 0.3.6
+Nelson - 0.3.9
 
 You can specify new version through template's parameters
 
