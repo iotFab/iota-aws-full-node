@@ -74,7 +74,7 @@ Parameters:
   NelsoCliVersionParameter:
     Description: "Nelson CLI version"
     Type: String
-    Default: "0.3.11"
+    Default: "0.3.12"
   IriVersionParameter:
     Description: "IRI version"
     Type: String
