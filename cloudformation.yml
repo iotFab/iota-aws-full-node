@@ -74,7 +74,7 @@ Parameters:
   NelsoCliVersionParameter:
     Description: "Nelson CLI version"
     Type: String
-    Default: "0.3.12"
+    Default: "0.3.16"
   IriVersionParameter:
     Description: "IRI version"
     Type: String
@@ -432,4 +432,4 @@ Outputs:
   CustomNodeURL:
     Description: "This address can be used to connect your wallet directly to your node"
     Value:
-      !Sub "http://${Ec2Instance.PublicDnsName}:${IriApiPortParameter}"
+     !Sub "http://${Ec2Instance.PublicDnsName}:${IriApiPortParameter}"
