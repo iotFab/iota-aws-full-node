@@ -20,7 +20,7 @@ You can specify new version through template's parameters
 ## Disclaimer
 - Working @ AWS, any opinions are my own.
 - Deploying this cloudformation template will incur a cost. 
-- This Cloudformation template automatically **accepts Oracle-Java-isntaller-8 license**
+- This Cloudformation template automatically **accepts Oracle-Java-installer-8 license**
 
 ## Requirements
 
