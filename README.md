@@ -48,7 +48,7 @@ Thanks to [SemkoDev](https://semkodev.com/) for hosting the cloudformation templ
 `git clone https://github.com/iotFab/iota-aws-full-node.git`
 
 #### Step 2: Deploy the template 
-`aws cloudformation create-stack --stack-name iotaws-full-node --template-body file://iota-aws-full-node/cloudformation.yml --parameters ParameterKey=KeyName,ParameterValue=<Your Keypair name>`
+`aws cloudformation create-stack --stack-name iotaws-full-node --template-body file://iota-aws-full-node/cloudformation.yml --parameters ParameterKey=KeyNameParameter,ParameterValue=<Your Keypair name>`
 
 More information:
 [AWS Cloudformation CLI commands](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-cli.html)
