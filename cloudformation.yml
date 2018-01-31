@@ -78,7 +78,7 @@ Parameters:
   IriVersionParameter:
     Description: "IRI version"
     Type: String
-    Default: "1.4.1.6"
+    Default: "1.4.2.1"
 
 # Mappings allow us to map a key to a corresponding set of named values
 # So if our instance is brought up in the eu-west-1 region we can use
