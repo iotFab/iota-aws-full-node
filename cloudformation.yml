@@ -341,7 +341,7 @@ Resources:
               - "sudo service iotapm start\n"
               - "\n"
               - "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\","
-              - "\"Reason\" : \"The iota fulle node is ready\","
+              - "\"Reason\" : \"The iota full node is ready\","
               - "\"UniqueId\" : \"Iota\","
               - "\"Data\" : \"Done\"}' "
               - "\""
