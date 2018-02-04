@@ -11,7 +11,7 @@ When the deployment finishes, Nelson and IOTA Full node will be running.
 
 Versions:
 
-IRI - 1.4.1.6
+IRI - 1.4.2.1
 
 Nelson - 0.3.16
 
