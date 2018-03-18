@@ -134,7 +134,7 @@ Resources:
       BlockDeviceMappings:
         - DeviceName: "/dev/sda1"
           Ebs:
-            VolumeSize: 25
+            VolumeSize: 35
             VolumeType: gp2
       InstanceType: !Ref InstanceTypeParameter
       KeyName:
