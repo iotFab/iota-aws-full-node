@@ -78,7 +78,11 @@ Parameters:
   IriVersionParameter:
     Description: "IRI version"
     Type: String
-    Default: "1.4.2.1"
+    Default: "1.5.0"
+  DiskSize:
+    Description: "GP2 Disk size"
+    Type: number
+    Default: "100" 
 
 # Mappings allow us to map a key to a corresponding set of named values
 # So if our instance is brought up in the eu-west-1 region we can use
@@ -134,7 +138,7 @@ Resources:
       BlockDeviceMappings:
         - DeviceName: "/dev/sda1"
           Ebs:
-            VolumeSize: 35
+            VolumeSize: !Ref DiskSize
             VolumeType: gp2
       InstanceType: !Ref InstanceTypeParameter
       KeyName:
