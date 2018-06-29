@@ -6,12 +6,12 @@ This cloudformation template deploys a full IOTA node with automatic neighbors s
 Deploying this template will incur cost.
 You can [estimate the stack cost within the AWS Management console](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-paying.html)
 
-This template sets up an EC2 instance.
+This template sets up an EC2 instance. EC2 disk size are template parameters. This size is set at 100 GB by default.
 When the deployment finishes, Nelson and IOTA Full node will be running.
 
 Versions:
 
-IRI - 1.4.2.1
+IRI - 1.5.0
 
 Nelson - 0.3.16
 
