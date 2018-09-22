@@ -82,7 +82,7 @@ Parameters:
   DiskSize:
     Description: "GP2 Disk size"
     Type: Number
-    Default: "100" 
+    Default: "100"
 
 # Mappings allow us to map a key to a corresponding set of named values
 # So if our instance is brought up in the eu-west-1 region we can use
@@ -123,8 +123,7 @@ Mappings:
 
 # Determine if a keypair name must be used
 Conditions:
-  HasKeyName: !Not [ !Equals [ !Ref KeyNameParameter, "" ]]
-
+  HasKeyName: !Not [!Equals [!Ref KeyNameParameter, ""]]
 
 # When pushing this CloudFormation we need to provide the public half of our key-pair
 # See http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
@@ -141,11 +140,14 @@ Resources:
             VolumeSize: !Ref DiskSize
             VolumeType: gp2
       InstanceType: !Ref InstanceTypeParameter
-      KeyName:
-        !If [HasKeyName, !Ref KeyNameParameter, !Ref "AWS::NoValue"]
+      KeyName: !If [HasKeyName, !Ref KeyNameParameter, !Ref "AWS::NoValue"]
       SecurityGroupIds:
         - !Ref Ec2InstanceSecurityGroup
-        - !If [HasKeyName, !Ref Ec2InstanceSecurityGroupSsh, !Ref "AWS::NoValue"]
+        - !If [
+            HasKeyName,
+            !Ref Ec2InstanceSecurityGroupSsh,
+            !Ref "AWS::NoValue",
+          ]
 
       # Select the correct AMI to load (based on the region the stack is created)
       ImageId:
@@ -155,8 +157,7 @@ Resources:
           - "AMI"
 
       Tags:
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Sub "IOTA full node EC2 instance (${AWS::StackName})"
 
       # Amazon's Linux AMI comes with a Ubuntu package called cloud-init installed
@@ -174,14 +175,14 @@ Resources:
         Fn::Base64:
           Fn::Join:
             - ""
-            -
-              - "#!/bin/bash -ex"
+            - - "#!/bin/bash -ex"
               - "\n"
-              - "apt update -qqy --fix-missing && sudo DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::options::=\"--force-confdef\" -o DPkg::options::=\"--force-confold\" upgrade && sudo apt-get clean -y && sudo apt-get autoremove -y --purge"
+              - 'apt update -qqy --fix-missing && sudo DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::options::="--force-confdef" -o DPkg::options::="--force-confold" upgrade && sudo apt-get clean -y && sudo apt-get autoremove -y --purge'
               - "\n"
               - "apt install software-properties-common -y && sudo add-apt-repository ppa:webupd8team/java -y && sudo apt update"
               - "\n"
-              - "echo \"oracle-java8-installer shared/accepted-oracle-license-v1-1 select true\" | debconf-set-selections && echo \"oracle-java8-installer shared/accepted-oracle-license-v1-1 seen true\" | debconf-set-selections"
+              - 'echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | debconf-set-selections && echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 seen true" | debconf-set-selections'
+              - "\n"
               - "\n"
               - "sudo apt install oracle-java8-installer curl wget jq -y && sudo apt install oracle-java8-set-default -y"
               - "\n"
@@ -208,7 +209,7 @@ Resources:
               - "KillMode=mixed\n"
               - "KillSignal=SIGTERM\n"
               - "TimeoutStopSec=60\n"
-              - !Sub "ExecStart=/usr/bin/java -Xmx3g -Djava.net.preferIPv4Stack=true -jar iri-${IriVersionParameter}.jar -c iota.ini\n"
+              - !Sub "ExecStart=/usr/bin/java -Xmx3400 -Djava.net.preferIPv4Stack=true -jar iri-${IriVersionParameter}.jar -c iota.ini\n"
               - "Restart=on-failure\n"
               - "RestartSec=30\n"
               - "[Install]\n"
@@ -345,13 +346,12 @@ Resources:
               - "sudo service iotapm start\n"
               - "\n"
               - "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\","
-              - "\"Reason\" : \"The iota full node is ready\","
-              - "\"UniqueId\" : \"Iota\","
+              - '"Reason" : "The iota full node is ready",'
+              - '"UniqueId" : "Iota",'
               - "\"Data\" : \"Done\"}' "
-              - "\""
+              - '"'
               - Ref: "WaitForInstanceWaitHandle"
               - "\"\n"
-
 
   # The following key has no properties.
   # I know that seems odd but there is a reason:
@@ -376,8 +376,8 @@ Resources:
         Ref: "WaitForInstanceWaitHandle"
       Timeout: !Ref TimeoutCfStackCreation
 
-   # We're allowing any IP address to access port 22, 14265, 14600 and 15600
-   # SSH tunnel will be used to access iota-pm
+    # We're allowing any IP address to access port 22, 14265, 14600 and 15600
+    # SSH tunnel will be used to access iota-pm
   Ec2InstanceSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
@@ -401,8 +401,7 @@ Resources:
           ToPort: "15600"
           CidrIp: "0.0.0.0/0"
       Tags:
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Sub "IOTA full node security group (${AWS::StackName})"
 
   Ec2InstanceSecurityGroupSsh:
@@ -417,23 +416,28 @@ Resources:
           ToPort: "22"
           CidrIp: "0.0.0.0/0"
       Tags:
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Sub "IOTA full node security group ssh (${AWS::StackName})"
 # The optional Outputs section declares the values that you want to return
 # in response to describe stack calls.
 # This output appears in the AWS console
 Outputs:
   PortForwardingCommand:
-    Description: "This command can be used to access your iota-pm. Ensure you adapt your keypair path (-i \"/mypath/to/keypair.pem\")"
+    Description: 'This command can be used to access your iota-pm. Ensure you adapt your keypair path (-i "/mypath/to/keypair.pem")'
     Value:
-      !If [HasKeyName, !Sub "ssh -i \"${KeyNameParameter}.pem\" -p 22 -L ${IriApiPortParameter}:localhost:${IriApiPortParameter} -L ${IotaPmPortParameter}:localhost:${IotaPmPortParameter} ubuntu@${Ec2Instance.PublicDnsName}",
-           "Please restart the deployment with an EC2 keypair"]
+      !If [
+        HasKeyName,
+        !Sub 'ssh -i "${KeyNameParameter}.pem" -p 22 -L ${IriApiPortParameter}:localhost:${IriApiPortParameter} -L ${IotaPmPortParameter}:localhost:${IotaPmPortParameter} ubuntu@${Ec2Instance.PublicDnsName}',
+        "Please restart the deployment with an EC2 keypair",
+      ]
   IotaPmWebsite:
     Description: "This link allow you to manage your neighbours via browser"
     Value:
-     !If [HasKeyName, !Sub "http://${IotaPmApiIpParameter}:${IotaPmPortParameter}" , "Please restart the deployment with an EC2 keypair"]
+      !If [
+        HasKeyName,
+        !Sub "http://${IotaPmApiIpParameter}:${IotaPmPortParameter}",
+        "Please restart the deployment with an EC2 keypair",
+      ]
   CustomNodeURL:
     Description: "This address can be used to connect your wallet directly to your node"
-    Value:
-     !Sub "http://${Ec2Instance.PublicDnsName}:${IriApiPortParameter}"
+    Value: !Sub "http://${Ec2Instance.PublicDnsName}:${IriApiPortParameter}"
