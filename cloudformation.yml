@@ -12,7 +12,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   KeyNameParameter:
     Description: "Optional: Name of an existing EC2 KeyPair to enable SSH access to the instance"
-    Type: String
+    Type: "AWS::EC2::KeyPair::KeyName"
     Default: ""
   TimeoutCfStackCreation:
     Description: "Enter the CloudFormation stack creation timeout (in seconds)"
@@ -376,6 +376,8 @@ Resources:
         Ref: "WaitForInstanceWaitHandle"
       Timeout: !Ref TimeoutCfStackCreation
 
+  
+
    # We're allowing any IP address to access port 22, 14265, 14600 and 15600
    # SSH tunnel will be used to access iota-pm
   Ec2InstanceSecurityGroup:
@@ -420,6 +422,17 @@ Resources:
         -
           Key: "Name"
           Value: !Sub "IOTA full node security group ssh (${AWS::StackName})"
+
+  # setup a new elastic IP, remove if using existing       
+  IPAddress:
+    Type: 'AWS::EC2::EIP'
+
+  IPAssoc:
+    Type: 'AWS::EC2::EIPAssociation'
+    Properties:
+      InstanceId: !Ref Ec2Instance
+      EIP: !Ref IPAddress
+      
 # The optional Outputs section declares the values that you want to return
 # in response to describe stack calls.
 # This output appears in the AWS console
@@ -437,3 +450,4 @@ Outputs:
     Description: "This address can be used to connect your wallet directly to your node"
     Value:
      !Sub "http://${Ec2Instance.PublicDnsName}:${IriApiPortParameter}"
+
