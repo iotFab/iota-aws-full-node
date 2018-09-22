@@ -74,11 +74,11 @@ Parameters:
   NelsoCliVersionParameter:
     Description: "Nelson CLI version"
     Type: String
-    Default: "0.3.16"
+    Default: "0.4.8"
   IriVersionParameter:
     Description: "IRI version"
     Type: String
-    Default: "1.5.0"
+    Default: "1.5.4"
   DiskSize:
     Description: "GP2 Disk size"
     Type: Number
