@@ -74,14 +74,14 @@ Parameters:
   NelsoCliVersionParameter:
     Description: "Nelson CLI version"
     Type: String
-    Default: "0.4.8"
+    Default: "0.3.16"
   IriVersionParameter:
     Description: "IRI version"
     Type: String
-    Default: "1.5.4"
+    Default: "1.5.0"
   DiskSize:
     Description: "GP2 Disk size"
-    Type: Number
+    Type: number
     Default: "100"
 
 # Mappings allow us to map a key to a corresponding set of named values
@@ -183,10 +183,9 @@ Resources:
               - "\n"
               - 'echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | debconf-set-selections && echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 seen true" | debconf-set-selections'
               - "\n"
-              - "\n"
               - "sudo apt install oracle-java8-installer curl wget jq -y && sudo apt install oracle-java8-set-default -y"
               - "\n"
-              - "sh -c 'echo JAVA_HOME=\"/usr/lib/jvm/java-8-oracle\" >> /etc/environment' && source /etc/environment"
+              - 'sh -c 'echo JAVA_HOME="/usr/lib/jvm/java-8-oracle" >> /etc/environment' && source /etc/environment'
               - "\n"
               - "curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -"
               - "\n"
@@ -240,6 +239,7 @@ Resources:
               - "REMOTE_LIMIT_API=\"removeNeighbors, addNeighbors, interruptAttachingToTangle, attachToTangle, getNeighbors\"\n"
               - "NEIGHBORS = udp://94.156.128.15:14600 udp://185.181.8.149:14600\n"
               - "EOF\n"
+              - "cd /tmp/ && curl -O http://db.iota.partners/iri-mainnetdb.tar.gz && sudo -u iota tar xzfv /tmp/iri-mainnetdb.tar.gz -C /home/iota/node/mainnetdb && rm /tmp/iri-mainnetdb.tar.gz"
               - "\n"
               - "sudo service iota start\n"
               - "echo '*/15 * * * * root bash -c \"bash <(curl -s https://gist.githubusercontent.com/zoran/48482038deda9ce5898c00f78d42f801/raw)\"' | sudo tee /etc/cron.d/iri_updater > /dev/null\n"
@@ -344,10 +344,10 @@ Resources:
               - "sudo systemctl daemon-reload && systemctl enable iotapm.service\n"
               - "sudo service iotapm start\n"
               - "\n"
-              - "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\","
+              - 'curl -X PUT -H 'Content-Type:' --data-binary '{"Status" : "SUCCESS",'
               - '"Reason" : "The iota full node is ready",'
               - '"UniqueId" : "Iota",'
-              - "\"Data\" : \"Done\"}' "
+              - '"Data" : "Done"}' '
               - '"'
               - Ref: "WaitForInstanceWaitHandle"
               - "\"\n"
