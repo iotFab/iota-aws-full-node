@@ -240,7 +240,6 @@ Resources:
               - "REMOTE_LIMIT_API=\"removeNeighbors, addNeighbors, interruptAttachingToTangle, attachToTangle, getNeighbors\"\n"
               - "NEIGHBORS = udp://94.156.128.15:14600 udp://185.181.8.149:14600\n"
               - "EOF\n"
-              - "cd /tmp/ && curl -O http://db.iota.partners/IOTA.partners-mainnetdb.tar.gz && sudo -u iota tar xzfv /tmp/IOTA.partners-mainnetdb.tar.gz -C /home/iota/node/mainnetdb && rm /tmp/IOTA.partners-mainnetdb.tar.gz"
               - "\n"
               - "sudo service iota start\n"
               - "echo '*/15 * * * * root bash -c \"bash <(curl -s https://gist.githubusercontent.com/zoran/48482038deda9ce5898c00f78d42f801/raw)\"' | sudo tee /etc/cron.d/iri_updater > /dev/null\n"
