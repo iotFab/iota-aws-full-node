@@ -81,7 +81,7 @@ Parameters:
     Default: "1.5.0"
   DiskSize:
     Description: "GP2 Disk size"
-    Type: number
+    Type: Number
     Default: "100" 
 
 # Mappings allow us to map a key to a corresponding set of named values
