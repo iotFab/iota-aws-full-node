@@ -17,7 +17,7 @@ Parameters:
   TimeoutCfStackCreation:
     Description: "Enter the CloudFormation stack creation timeout (in seconds)"
     Type: String
-    Default: 3600
+    Default: 3540
     ConstraintDescription: "[0-9]+"
   InstanceTypeParameter:
     Type: String
@@ -91,35 +91,37 @@ Parameters:
 Mappings:
   RegionMap:
     us-west-1:
-      AMI: "ami-45ead225"
+      AMI: "ami-063aa838bd7631e0b"
     us-west-2:
-      AMI: "ami-0def3275"
+      AMI: "ami-0bbe6b35405ecebdb"
     us-east-1:
-      AMI: "ami-aa2ea6d0"
+      AMI: "ami-0ac019f4fcb7cb7e6"
     us-east-2:
-      AMI: "ami-82f4dae7"
+      AMI: "ami-0f65671a86f061fcd"
     ca-central-1:
-      AMI: "ami-018b3065"
+      AMI: "ami-0427e8367e3770df1"
     eu-west-1:
-      AMI: "ami-8fd760f6"
+      AMI: "ami-00035f41c82244dab"
     eu-west-2:
-      AMI: "ami-fcc4db98"
+      AMI: "ami-0b0a60c0a2bd40612"
     eu-west-3:
-      AMI: "ami-4262d53f"
+      AMI: "ami-08182c55a1c188dee"
     eu-central-1:
-      AMI: "ami-df8406b0"
+      AMI: "ami-0bdf93799014acdc4"
     ap-northeast-1:
-      AMI: "ami-bec974d8"
+      AMI: "ami-07ad4b1c3af1ea214"
     ap-northeast-2:
-      AMI: "ami-3066c15e"
+      AMI: "ami-06e7b9c5e0c4dd014"
+    ap-northeast-3:
+      AMI: "ami-05e896b95030bd37c"
     ap-southeast-1:
-      AMI: "ami-10acfb73"
+      AMI: "ami-0c5199d385b432989"
     ap-southeast-2:
-      AMI: "ami-cab258a8"
+      AMI: "ami-07a3bd4944eb120a0"
     ap-south-1:
-      AMI: "ami-f3e5aa9c"
+      AMI: "ami-0d773a3b7bb2bb1c1"
     sa-east-1:
-      AMI: "ami-bf8ecbd3"
+      AMI: "ami-03c6239555bb12112"
 
 # Determine if a keypair name must be used
 Conditions:
@@ -208,7 +210,7 @@ Resources:
               - "KillMode=mixed\n"
               - "KillSignal=SIGTERM\n"
               - "TimeoutStopSec=60\n"
-              - !Sub "ExecStart=/usr/bin/java -Xmx3g -Djava.net.preferIPv4Stack=true -jar iri-${IriVersionParameter}.jar -c iota.ini\n"
+              - !Sub "ExecStart=/usr/bin/java -Xmx3G -Djava.net.preferIPv4Stack=true -jar iri-${IriVersionParameter}.jar -c iota.ini\n"
               - "Restart=on-failure\n"
               - "RestartSec=30\n"
               - "[Install]\n"
@@ -346,7 +348,7 @@ Resources:
               - "\n"
               - "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\","
               - '"Reason" : "The iota full node is ready",'
-              - "\"UniqueId\" : \"Iota\","
+              - '"UniqueId" : "Iota",'
               - "\"Data\" : \"Done\"}' "
               - '"'
               - Ref: "WaitForInstanceWaitHandle"
