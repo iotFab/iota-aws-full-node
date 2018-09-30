@@ -74,14 +74,14 @@ Parameters:
   NelsoCliVersionParameter:
     Description: "Nelson CLI version"
     Type: String
-    Default: "0.3.16"
+    Default: "0.4.8"
   IriVersionParameter:
     Description: "IRI version"
     Type: String
-    Default: "1.5.0"
+    Default: "1.5.4"
   DiskSize:
     Description: "GP2 Disk size"
-    Type: number
+    Type: Number
     Default: "100"
 
 # Mappings allow us to map a key to a corresponding set of named values
@@ -185,7 +185,7 @@ Resources:
               - "\n"
               - "sudo apt install oracle-java8-installer curl wget jq -y && sudo apt install oracle-java8-set-default -y"
               - "\n"
-              - 'sh -c 'echo JAVA_HOME="/usr/lib/jvm/java-8-oracle" >> /etc/environment' && source /etc/environment'
+              - "sh -c 'echo JAVA_HOME=\"/usr/lib/jvm/java-8-oracle\" >> /etc/environment' && source /etc/environment"
               - "\n"
               - "curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -"
               - "\n"
@@ -344,10 +344,10 @@ Resources:
               - "sudo systemctl daemon-reload && systemctl enable iotapm.service\n"
               - "sudo service iotapm start\n"
               - "\n"
-              - 'curl -X PUT -H 'Content-Type:' --data-binary '{"Status" : "SUCCESS",'
+              - "curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\","
               - '"Reason" : "The iota full node is ready",'
-              - '"UniqueId" : "Iota",'
-              - '"Data" : "Done"}' '
+              - "\"UniqueId\" : \"Iota\","
+              - "\"Data\" : \"Done\"}' "
               - '"'
               - Ref: "WaitForInstanceWaitHandle"
               - "\"\n"
