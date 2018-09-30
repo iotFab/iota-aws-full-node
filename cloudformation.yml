@@ -208,7 +208,7 @@ Resources:
               - "KillMode=mixed\n"
               - "KillSignal=SIGTERM\n"
               - "TimeoutStopSec=60\n"
-              - !Sub "ExecStart=/usr/bin/java -Xmx3400 -Djava.net.preferIPv4Stack=true -jar iri-${IriVersionParameter}.jar -c iota.ini\n"
+              - !Sub "ExecStart=/usr/bin/java -Xmx3g -Djava.net.preferIPv4Stack=true -jar iri-${IriVersionParameter}.jar -c iota.ini\n"
               - "Restart=on-failure\n"
               - "RestartSec=30\n"
               - "[Install]\n"
